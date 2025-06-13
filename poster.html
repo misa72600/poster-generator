@@ -56,17 +56,15 @@
     let draggingText = null;
 
     let portrait = new Image();
-    portrait.crossOrigin = 'anonymous';
     portrait.src = 'https://i.imgur.com/8Km9tLL.jpg';
 
     let background = new Image();
-    background.crossOrigin = 'anonymous';
-    background.src = 'https://misa72600.github.io/poster-generator/images/kk.png';
+    background.src = 'https://misa72600.github.io/poster-generator/images/123.png';
 
     function draw() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
-      if (background.complete) ctx.drawImage(background, 0, 0, canvas.width, canvas.height);
-      if (portrait && portrait.complete) ctx.drawImage(portrait, 200, 300, 400, 600);
+      if (background.complete && background.naturalWidth > 0) ctx.drawImage(background, 0, 0, canvas.width, canvas.height);
+      if (portrait && portrait.complete && portrait.naturalWidth > 0) ctx.drawImage(portrait, 200, 300, 400, 600);
 
       [text1, text2].forEach(text => {
         ctx.font = `${text.size}px 'Noto Sans TC', sans-serif`;
@@ -127,7 +125,7 @@
               portrait = new Image();
               portrait.onload = draw;
               portrait.src = event.target.result;
-            }
+            };
             reader.readAsDataURL(file);
           });
 
@@ -137,8 +135,10 @@
             link.href = canvas.toDataURL();
             link.click();
           });
-        }
-      }
+        };
+      };
+
+      background.onerror = () => alert("背景圖片載入失敗，請確認圖片網址是否正確。");
     }
 
     window.onload = init;
