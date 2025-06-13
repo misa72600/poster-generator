@@ -29,7 +29,7 @@
       display: block;
       margin-top: 10px;
     }
-    .controls input[type="text"], .controls input[type="number"], .controls input[type="file"] {
+    .controls input[type="text"], .controls input[type="file"], .controls input[type="range"] {
       width: 100%;
       padding: 4px;
       margin-top: 4px;
@@ -51,16 +51,17 @@
       font-family: 'Noto Sans TC', sans-serif;
     }
     #downloadBtn:hover {
-      background: #27ae60;
+      background: #145a32;
     }
     canvas {
       flex: 1;
       width: 100%;
-      max-width: 400px;
+      max-width: 540px;
       background: #444;
       border: 1px solid #000;
       margin: auto;
       display: block;
+      cursor: default;
     }
     @media (min-width: 768px) {
       body { flex-direction: row; }
@@ -77,12 +78,15 @@
     <label for="text1Input">Coser名稱</label>
     <input type="text" id="text1Input" value="Coser名稱" />
     <label for="size1Input">字體大小</label>
-    <input type="number" id="size1Input" value="64" />
+    <input type="range" id="size1Input" min="16" max="150" value="64" />
+    <label for="x1Input">水平位置</label>
+    <input type="range" id="x1Input" min="0" max="1080" value="540" />
+    <label for="y1Input">垂直位置</label>
+    <input type="range" id="y1Input" min="0" max="1350" value="100" />
 
-    <label for="text2Input">攤位編號</label>
-    <input type="text" id="text2Input" value="A01" />
-    <label for="size2Input">字體大小</label>
-    <input type="number" id="size2Input" value="56" />
+    <label>文字方向</label>
+    <label><input type="radio" name="direction" value="horizontal" checked> 橫向</label>
+    <label><input type="radio" name="direction" value="vertical"> 垂直</label>
 
     <button id="resetBtn">重設</button>
     <button id="downloadBtn">下載圖片</button>
@@ -94,19 +98,25 @@
     const ctx = canvas.getContext('2d');
 
     const text1Input = document.getElementById('text1Input');
-    const text2Input = document.getElementById('text2Input');
     const size1Input = document.getElementById('size1Input');
-    const size2Input = document.getElementById('size2Input');
+    const x1Input = document.getElementById('x1Input');
+    const y1Input = document.getElementById('y1Input');
     const photoInput = document.getElementById('photoInput');
     const downloadBtn = document.getElementById('downloadBtn');
     const resetBtn = document.getElementById('resetBtn');
+    const directionInputs = document.getElementsByName('direction');
 
-    let text1 = { value: text1Input.value, x: 30, y: 500, size: parseInt(size1Input.value) };
-    let text2 = { value: text2Input.value, x: 30, y: 560, size: parseInt(size2Input.value) };
-    let draggingText = null;
+    let text1 = {
+      value: text1Input.value,
+      x: parseInt(x1Input.value),
+      y: parseInt(y1Input.value),
+      size: parseInt(size1Input.value),
+      direction: 'horizontal',
+      center: false
+    };
 
     let portrait = null;
-    let portraitX = 100, portraitY = 150;
+    let portraitX = 0, portraitY = 0;
     let portraitScale = 1;
 
     const background = new Image();
@@ -124,57 +134,52 @@
 
       ctx.drawImage(background, 0, 0, canvas.width, canvas.height);
 
-      [text1, text2].forEach(t => {
-        ctx.font = `${t.size}px 'Noto Sans TC'`;
-        ctx.lineWidth = 6;
-        ctx.strokeStyle = '#000';
-        ctx.fillStyle = '#fff';
-        ctx.strokeText(t.value, t.x, t.y);
-        ctx.fillText(t.value, t.x, t.y);
-      });
+      ctx.font = `${text1.size}px 'Noto Sans TC'`;
+      ctx.shadowColor = 'rgba(0,0,0,0.6)';
+      ctx.shadowBlur = 8;
+      ctx.fillStyle = '#fff';
+
+      ctx.save();
+      ctx.translate(text1.x, text1.y);
+      if (text1.direction === 'vertical') {
+        for (let i = 0; i < text1.value.length; i++) {
+          const ch = text1.value[i];
+          ctx.fillText(ch, 0, i * text1.size);
+        }
+      } else {
+        ctx.fillText(text1.value, 0, 0);
+      }
+      ctx.restore();
     }
 
     function enableControls() {
-      [text1Input, text2Input, size1Input, size2Input].forEach(el => {
+      [text1Input, size1Input, x1Input, y1Input].forEach(el => {
         el.addEventListener('input', () => {
           text1.value = text1Input.value;
-          text2.value = text2Input.value;
           text1.size = parseInt(size1Input.value);
-          text2.size = parseInt(size2Input.value);
+          text1.x = parseInt(x1Input.value);
+          text1.y = parseInt(y1Input.value);
           drawAll();
         });
       });
 
-      resetBtn.addEventListener('click', () => {
-        text1 = { value: 'Coser名稱', x: 30, y: 500, size: 64 };
-        text2 = { value: 'A01', x: 30, y: 560, size: 56 };
-        portraitX = 100;
-        portraitY = 150;
-        drawAll();
-      });
-
-      canvas.addEventListener('mousedown', e => {
-        const mx = e.offsetX, my = e.offsetY;
-        [text1, text2].forEach(t => {
-          ctx.font = `${t.size}px 'Noto Sans TC'`;
-          const w = ctx.measureText(t.value).width;
-          const h = t.size;
-          if (mx >= t.x && mx <= t.x + w && my >= t.y - h && my <= t.y) {
-            draggingText = t;
+      directionInputs.forEach(input => {
+        input.addEventListener('change', () => {
+          if (input.checked) {
+            text1.direction = input.value;
+            drawAll();
           }
         });
       });
 
-      canvas.addEventListener('mousemove', e => {
-        if (draggingText) {
-          draggingText.x = e.offsetX;
-          draggingText.y = e.offsetY;
-          drawAll();
-        }
-      });
-
-      canvas.addEventListener('mouseup', () => {
-        draggingText = null;
+      resetBtn.addEventListener('click', () => {
+        text1 = { value: 'Coser名稱', x: 540, y: 100, size: 64, direction: 'horizontal', center: false };
+        x1Input.value = 540;
+        y1Input.value = 100;
+        size1Input.value = 64;
+        text1Input.value = 'Coser名稱';
+        document.querySelector('input[name="direction"][value="horizontal"]').checked = true;
+        drawAll();
       });
 
       photoInput.addEventListener('change', e => {
