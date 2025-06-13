@@ -48,7 +48,7 @@
       flex: 1;
       width: 100%;
       max-width: 400px;
-      background: #888;
+      background: #444;
       border: 1px solid #000;
       margin: auto;
       display: block;
@@ -83,11 +83,11 @@
     const canvas = document.getElementById('c');
     const ctx = canvas.getContext('2d');
 
-    const photoInput = document.getElementById('photoInput');
     const text1Input = document.getElementById('text1Input');
     const text2Input = document.getElementById('text2Input');
     const size1Input = document.getElementById('size1Input');
     const size2Input = document.getElementById('size2Input');
+    const photoInput = document.getElementById('photoInput');
     const downloadBtn = document.getElementById('downloadBtn');
 
     let text1 = { value: text1Input.value, x: 30, y: 500, size: parseInt(size1Input.value) };
@@ -96,50 +96,52 @@
 
     let portrait = null;
     const background = new Image();
+    background.crossOrigin = 'anonymous';
     background.src = 'https://misa72600.github.io/poster-generator/123.png';
 
-    function draw() {
+    function drawAll() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
       if (background.complete && background.naturalWidth > 0) {
         ctx.drawImage(background, 0, 0, canvas.width, canvas.height);
       } else {
-        console.warn('⚠️ 背景圖尚未載入或有問題');
+        ctx.fillStyle = '#222';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
       }
 
       if (portrait && portrait.complete && portrait.naturalWidth > 0) {
         ctx.drawImage(portrait, 100, 150, 200, 300);
-      } else if (portrait) {
-        console.warn('⚠️ 使用者上傳的圖片尚未完成載入');
       }
 
-      [text1, text2].forEach(text => {
-        ctx.font = `${text.size}px 'Noto Sans TC', sans-serif`;
-        ctx.lineWidth = 8;
+      [text1, text2].forEach(t => {
+        ctx.font = `${t.size}px 'Noto Sans TC'`;
+        ctx.lineWidth = 6;
         ctx.strokeStyle = '#000';
         ctx.fillStyle = '#fff';
-        ctx.strokeText(text.value, text.x, text.y);
-        ctx.fillText(text.value, text.x, text.y);
+        ctx.strokeText(t.value, t.x, t.y);
+        ctx.fillText(t.value, t.x, t.y);
       });
     }
 
-    function updateText() {
-      text1.value = text1Input.value;
-      text2.value = text2Input.value;
-      text1.size = parseInt(size1Input.value);
-      text2.size = parseInt(size2Input.value);
-      draw();
-    }
+    function enableControls() {
+      [text1Input, text2Input, size1Input, size2Input].forEach(el => {
+        el.addEventListener('input', () => {
+          text1.value = text1Input.value;
+          text2.value = text2Input.value;
+          text1.size = parseInt(size1Input.value);
+          text2.size = parseInt(size2Input.value);
+          drawAll();
+        });
+      });
 
-    function enableInteractions() {
       canvas.addEventListener('mousedown', e => {
         const mx = e.offsetX, my = e.offsetY;
-        [text1, text2].forEach(text => {
-          ctx.font = `${text.size}px 'Noto Sans TC', sans-serif`;
-          const width = ctx.measureText(text.value).width;
-          const height = text.size;
-          if (mx >= text.x && mx <= text.x + width && my <= text.y && my >= text.y - height) {
-            draggingText = text;
+        [text1, text2].forEach(t => {
+          ctx.font = `${t.size}px 'Noto Sans TC'`;
+          const w = ctx.measureText(t.value).width;
+          const h = t.size;
+          if (mx >= t.x && mx <= t.x + w && my >= t.y - h && my <= t.y) {
+            draggingText = t;
           }
         });
       });
@@ -148,26 +150,22 @@
         if (draggingText) {
           draggingText.x = e.offsetX;
           draggingText.y = e.offsetY;
-          draw();
+          drawAll();
         }
       });
 
-      canvas.addEventListener('mouseup', () => {
-        draggingText = null;
-      });
-
-      text1Input.addEventListener('input', updateText);
-      text2Input.addEventListener('input', updateText);
-      size1Input.addEventListener('input', updateText);
-      size2Input.addEventListener('input', updateText);
+      canvas.addEventListener('mouseup', () => draggingText = null);
 
       photoInput.addEventListener('change', e => {
         const file = e.target.files[0];
+        if (!file) return;
         const reader = new FileReader();
-        reader.onload = function(event) {
+        reader.onload = ev => {
           portrait = new Image();
-          portrait.onload = draw;
-          portrait.src = event.target.result;
+          portrait.onload = () => {
+            drawAll();
+          };
+          portrait.src = ev.target.result;
         };
         reader.readAsDataURL(file);
       });
@@ -180,13 +178,11 @@
       });
     }
 
-    background.decode().then(() => {
-      console.log('✅ 背景圖 decode 成功');
-      draw();
-      enableInteractions();
-    }).catch(() => {
-      alert("背景圖片載入失敗，請確認圖片網址是否正確。");
-    });
+    background.onload = () => {
+      console.log('✅ 背景圖已載入');
+      drawAll();
+      enableControls();
+    }
   </script>
 </body>
 </html>
