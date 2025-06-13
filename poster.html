@@ -151,6 +151,7 @@
         drawAll();
       });
 
+      let isDragging = false;
       canvas.addEventListener('mousedown', e => {
         const mx = e.offsetX, my = e.offsetY;
         [text1, text2].forEach(t => {
@@ -159,12 +160,13 @@
           const h = t.size;
           if (mx >= t.x && mx <= t.x + w && my >= t.y - h && my <= t.y) {
             draggingText = t;
+            isDragging = true;
           }
         });
       });
 
       canvas.addEventListener('mousemove', e => {
-        if (draggingText && e.buttons === 1) {
+        if (isDragging && draggingText) {
           draggingText.x = e.offsetX;
           draggingText.y = e.offsetY;
           drawAll();
@@ -173,6 +175,7 @@
 
       canvas.addEventListener('mouseup', () => {
         draggingText = null;
+        isDragging = false;
       });
 
       photoInput.addEventListener('change', e => {
