@@ -101,8 +101,8 @@
     const downloadBtn = document.getElementById('downloadBtn');
     const resetBtn = document.getElementById('resetBtn');
 
-    let text1 = { value: text1Input.value, x: 60, y: 1150, size: parseInt(size1Input.value) };
-    let text2 = { value: text2Input.value, x: 60, y: 1270, size: parseInt(size2Input.value) };
+    let text1 = { value: text1Input.value, x: canvas.width / 2, y: 60, size: parseInt(size1Input.value), center: true };
+    let text2 = { value: text2Input.value, x: 80, y: 120, size: parseInt(size2Input.value), center: false };
     let draggingText = null;
 
     let portrait = null;
@@ -129,8 +129,10 @@
         ctx.lineWidth = 6;
         ctx.strokeStyle = '#000';
         ctx.fillStyle = '#fff';
-        ctx.strokeText(t.value, t.x, t.y);
-        ctx.fillText(t.value, t.x, t.y);
+        const textWidth = ctx.measureText(t.value).width;
+        const x = t.center ? t.x - textWidth / 2 : t.x;
+        ctx.strokeText(t.value, x, t.y);
+        ctx.fillText(t.value, x, t.y);
       });
     }
 
@@ -146,8 +148,8 @@
       });
 
       resetBtn.addEventListener('click', () => {
-        text1 = { value: 'Coser名稱', x: 60, y: 1150, size: 64 };
-        text2 = { value: 'A01', x: 60, y: 1270, size: 56 };
+        text1 = { value: 'Coser名稱', x: canvas.width / 2, y: 60, size: 64, center: true };
+        text2 = { value: 'A01', x: 80, y: 120, size: 56, center: false };
         drawAll();
       });
 
@@ -156,9 +158,11 @@
         const mx = e.offsetX, my = e.offsetY;
         [text1, text2].forEach(t => {
           ctx.font = `${t.size}px 'Noto Sans TC'`;
-          const w = ctx.measureText(t.value).width;
+          const textWidth = ctx.measureText(t.value).width;
+          const x = t.center ? t.x - textWidth / 2 : t.x;
+          const w = textWidth;
           const h = t.size;
-          if (mx >= t.x && mx <= t.x + w && my >= t.y - h && my <= t.y) {
+          if (mx >= x && mx <= x + w && my >= t.y - h && my <= t.y) {
             draggingText = t;
             isDragging = true;
           }
@@ -169,6 +173,7 @@
         if (isDragging && draggingText) {
           draggingText.x = e.offsetX;
           draggingText.y = e.offsetY;
+          draggingText.center = false;
           drawAll();
         }
       });
