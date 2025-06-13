@@ -78,6 +78,10 @@
     <label for="scaleInput">照片縮放（%）</label>
     <input type="number" id="scaleInput" value="100" min="10" max="300" />
 
+    <label for="rotateInput">照片旋轉（度）</label>
+    <input type="number" id="rotateInput" value="0" min="0" max="360" />
+
+    <button id="resetBtn">重設</button>
     <button id="downloadBtn">下載圖片</button>
   </div>
 
@@ -92,7 +96,9 @@
     const size2Input = document.getElementById('size2Input');
     const photoInput = document.getElementById('photoInput');
     const scaleInput = document.getElementById('scaleInput');
+    const rotateInput = document.getElementById('rotateInput');
     const downloadBtn = document.getElementById('downloadBtn');
+    const resetBtn = document.getElementById('resetBtn');
 
     let text1 = { value: text1Input.value, x: 30, y: 500, size: parseInt(size1Input.value) };
     let text2 = { value: text2Input.value, x: 30, y: 560, size: parseInt(size2Input.value) };
@@ -102,6 +108,7 @@
     let portrait = null;
     let portraitX = 100, portraitY = 150;
     let portraitScale = 1;
+    let portraitRotation = 0;
 
     const background = new Image();
     background.crossOrigin = 'anonymous';
@@ -109,13 +116,20 @@
 
     function drawAll() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
-      ctx.drawImage(background, 0, 0, canvas.width, canvas.height);
 
+      // Draw portrait first (底層)
       if (portrait) {
         const sw = portrait.naturalWidth * portraitScale;
         const sh = portrait.naturalHeight * portraitScale;
-        ctx.drawImage(portrait, portraitX, portraitY, sw, sh);
+        ctx.save();
+        ctx.translate(portraitX + sw / 2, portraitY + sh / 2);
+        ctx.rotate((portraitRotation * Math.PI) / 180);
+        ctx.drawImage(portrait, -sw / 2, -sh / 2, sw, sh);
+        ctx.restore();
       }
+
+      // Draw background over portrait
+      ctx.drawImage(background, 0, 0, canvas.width, canvas.height);
 
       [text1, text2].forEach(t => {
         ctx.font = `${t.size}px 'Noto Sans TC'`;
@@ -128,15 +142,32 @@
     }
 
     function enableControls() {
-      [text1Input, text2Input, size1Input, size2Input, scaleInput].forEach(el => {
+      [text1Input, text2Input, size1Input, size2Input, scaleInput, rotateInput].forEach(el => {
         el.addEventListener('input', () => {
           text1.value = text1Input.value;
           text2.value = text2Input.value;
           text1.size = parseInt(size1Input.value);
           text2.size = parseInt(size2Input.value);
           portraitScale = parseFloat(scaleInput.value) / 100;
+          portraitRotation = parseFloat(rotateInput.value);
           drawAll();
         });
+      });
+
+      resetBtn.addEventListener('click', () => {
+        text1 = { value: 'Coser名稱', x: 30, y: 500, size: 64 };
+        text2 = { value: '攤位編號 A01', x: 30, y: 560, size: 56 };
+        portraitX = 100;
+        portraitY = 150;
+        portraitScale = 1;
+        portraitRotation = 0;
+        text1Input.value = text1.value;
+        text2Input.value = text2.value;
+        size1Input.value = text1.size;
+        size2Input.value = text2.size;
+        scaleInput.value = 100;
+        rotateInput.value = 0;
+        drawAll();
       });
 
       canvas.addEventListener('mousedown', e => {
