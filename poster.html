@@ -55,11 +55,9 @@
     let text2 = { value: text2Input.value, x: 60, y: 1080, size: parseInt(size2Input.value) };
     let draggingText = null;
 
-    let portrait = new Image();
-    portrait.src = 'https://i.imgur.com/8Km9tLL.jpg';
-
-    let background = new Image();
-    background.src = 'https://misa72600.github.io/poster-generator/images/123.png';
+    let portrait = null;
+    const background = new Image();
+    background.src = 'https://misa72600.github.io/poster-generator/123.png';
 
     function draw() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -84,64 +82,64 @@
       draw();
     }
 
-    function init() {
-      background.onload = () => {
-        portrait.onload = () => {
+    function enableInteractions() {
+      canvas.addEventListener('mousedown', e => {
+        const mx = e.offsetX, my = e.offsetY;
+        [text1, text2].forEach(text => {
+          ctx.font = `${text.size}px 'Noto Sans TC', sans-serif`;
+          const width = ctx.measureText(text.value).width;
+          const height = text.size;
+          if (mx >= text.x && mx <= text.x + width && my <= text.y && my >= text.y - height) {
+            draggingText = text;
+          }
+        });
+      });
+
+      canvas.addEventListener('mousemove', e => {
+        if (draggingText) {
+          draggingText.x = e.offsetX;
+          draggingText.y = e.offsetY;
           draw();
+        }
+      });
 
-          canvas.addEventListener('mousedown', e => {
-            const mx = e.offsetX, my = e.offsetY;
-            [text1, text2].forEach(text => {
-              ctx.font = `${text.size}px 'Noto Sans TC', sans-serif`;
-              const width = ctx.measureText(text.value).width;
-              const height = text.size;
-              if (mx >= text.x && mx <= text.x + width && my <= text.y && my >= text.y - height) {
-                draggingText = text;
-              }
-            });
-          });
+      canvas.addEventListener('mouseup', () => {
+        draggingText = null;
+      });
 
-          canvas.addEventListener('mousemove', e => {
-            if (draggingText) {
-              draggingText.x = e.offsetX;
-              draggingText.y = e.offsetY;
-              draw();
-            }
-          });
+      text1Input.addEventListener('input', updateText);
+      text2Input.addEventListener('input', updateText);
+      size1Input.addEventListener('input', updateText);
+      size2Input.addEventListener('input', updateText);
 
-          canvas.addEventListener('mouseup', () => {
-            draggingText = null;
-          });
-
-          text1Input.addEventListener('input', updateText);
-          text2Input.addEventListener('input', updateText);
-          size1Input.addEventListener('input', updateText);
-          size2Input.addEventListener('input', updateText);
-
-          photoInput.addEventListener('change', e => {
-            const file = e.target.files[0];
-            const reader = new FileReader();
-            reader.onload = function(event) {
-              portrait = new Image();
-              portrait.onload = draw;
-              portrait.src = event.target.result;
-            };
-            reader.readAsDataURL(file);
-          });
-
-          downloadBtn.addEventListener('click', () => {
-            const link = document.createElement('a');
-            link.download = 'poster.png';
-            link.href = canvas.toDataURL();
-            link.click();
-          });
+      photoInput.addEventListener('change', e => {
+        const file = e.target.files[0];
+        const reader = new FileReader();
+        reader.onload = function(event) {
+          portrait = new Image();
+          portrait.onload = draw;
+          portrait.src = event.target.result;
         };
-      };
+        reader.readAsDataURL(file);
+      });
 
-      background.onerror = () => alert("背景圖片載入失敗，請確認圖片網址是否正確。");
+      downloadBtn.addEventListener('click', () => {
+        const link = document.createElement('a');
+        link.download = 'poster.png';
+        link.href = canvas.toDataURL();
+        link.click();
+      });
     }
 
-    window.onload = init;
+    background.onload = () => {
+      console.log('✅ 背景圖已載入');
+      draw();
+      enableInteractions();
+    };
+
+    background.onerror = () => {
+      alert("背景圖片載入失敗，請確認圖片網址是否正確。");
+    };
   </script>
 </body>
 </html>
