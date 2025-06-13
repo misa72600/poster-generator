@@ -1,10 +1,12 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>圖片合成範例</title>
   <style>
-    body { margin: 0; }
-    canvas { border: 1px solid #000; }
+    body { margin: 0; display: flex; align-items: center; justify-content: center; height: 100vh; background: #222; }
+    canvas { border: 1px solid #000; background: #fff; }
   </style>
 </head>
 <body>
@@ -13,28 +15,28 @@
     const canvas = document.getElementById('c');
     const ctx = canvas.getContext('2d');
 
-    window.addEventListener('message', (event) => {
-      const data = event.data;
-      if (!data || !data.photo || !data.name || !data.link) return;
+    const background = new Image();
+    background.crossOrigin = 'anonymous';
+    background.src = 'https://i.imgur.com/vFvNpJx.jpg'; // 模板背景
 
-      const img = new Image();
-      img.crossOrigin = 'anonymous';
-      img.src = data.photo;
-      img.onload = () => {
-        // 背景
-        ctx.fillStyle = '#222';
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-        // 照片
-        ctx.drawImage(img, 150, 200, 500, 700);
-        // 名稱
+    const portrait = new Image();
+    portrait.crossOrigin = 'anonymous';
+    portrait.src = 'https://i.imgur.com/8Km9tLL.jpg'; // 測試用人物照片
+
+    background.onload = () => {
+      ctx.drawImage(background, 0, 0, canvas.width, canvas.height);
+
+      portrait.onload = () => {
+        ctx.drawImage(portrait, 150, 200, 500, 700);
+
         ctx.font = '40px sans-serif';
-        ctx.fillStyle = '#fff';
-        ctx.fillText(data.name, 50, 980);
-        // 社群
+        ctx.fillStyle = '#ffffff';
+        ctx.fillText('小紅帽 REDHOOD', 50, 980);
+
         ctx.font = '28px sans-serif';
-        ctx.fillText(data.link, 50, 1040);
-      };
-    });
+        ctx.fillText('@redhood_cos', 50, 1040);
+      }
+    }
   </script>
 </body>
 </html>
