@@ -44,6 +44,10 @@
       border: none;
       cursor: pointer;
     }
+    #downloadBtn {
+      background: #2ecc71;
+      color: #fff;
+    }
     canvas {
       flex: 1;
       width: 100%;
@@ -104,6 +108,7 @@
     let text2 = { value: text2Input.value, x: 30, y: 560, size: parseInt(size2Input.value) };
     let draggingText = null;
     let draggingImage = false;
+    let isMouseDown = false;
 
     let portrait = null;
     let portraitX = 100, portraitY = 150;
@@ -171,6 +176,7 @@
       });
 
       canvas.addEventListener('mousedown', e => {
+        isMouseDown = true;
         const mx = e.offsetX, my = e.offsetY;
         const sw = portrait ? portrait.naturalWidth * portraitScale : 0;
         const sh = portrait ? portrait.naturalHeight * portraitScale : 0;
@@ -190,6 +196,7 @@
       });
 
       canvas.addEventListener('mousemove', e => {
+        if (!isMouseDown) return;
         if (draggingText) {
           draggingText.x = e.offsetX;
           draggingText.y = e.offsetY;
@@ -203,6 +210,7 @@
       });
 
       canvas.addEventListener('mouseup', () => {
+        isMouseDown = false;
         draggingText = null;
         draggingImage = false;
       });
@@ -214,6 +222,12 @@
         reader.onload = ev => {
           portrait = new Image();
           portrait.onload = () => {
+            // 自動將圖片長邊對齊畫布長邊，並置中
+            const scaleW = canvas.width / portrait.naturalWidth;
+            const scaleH = canvas.height / portrait.naturalHeight;
+            const scale = Math.max(scaleW, scaleH);
+            portraitScale = scale;
+            scaleInput.value = Math.round(scale * 100);
             portraitX = (canvas.width - portrait.naturalWidth * portraitScale) / 2;
             portraitY = (canvas.height - portrait.naturalHeight * portraitScale) / 2;
             drawAll();
