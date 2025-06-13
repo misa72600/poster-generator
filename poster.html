@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <style>
+    body { margin: 0; }
+    canvas { border: 1px solid #000; }
+  </style>
+</head>
+<body>
+  <canvas id="c" width="800" height="1200"></canvas>
+  <script>
+    const canvas = document.getElementById('c');
+    const ctx = canvas.getContext('2d');
+
+    window.addEventListener('message', (event) => {
+      const data = event.data;
+      if (!data || !data.photo || !data.name || !data.link) return;
+
+      const img = new Image();
+      img.crossOrigin = 'anonymous';
+      img.src = data.photo;
+      img.onload = () => {
+        // 背景
+        ctx.fillStyle = '#222';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        // 照片
+        ctx.drawImage(img, 150, 200, 500, 700);
+        // 名稱
+        ctx.font = '40px sans-serif';
+        ctx.fillStyle = '#fff';
+        ctx.fillText(data.name, 50, 980);
+        // 社群
+        ctx.font = '28px sans-serif';
+        ctx.fillText(data.link, 50, 1040);
+      };
+    });
+  </script>
+</body>
+</html>
