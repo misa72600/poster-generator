@@ -51,12 +51,12 @@
       font-family: 'Noto Sans TC', sans-serif;
     }
     #downloadBtn:hover {
-      background: #145a32;
+      background: #27ae60;
     }
     canvas {
       flex: 1;
       width: 100%;
-      max-width: 540px;
+      max-width: 400px;
       background: #444;
       border: 1px solid #000;
       margin: auto;
@@ -76,12 +76,12 @@
 
     <label for="text1Input">Coser名稱</label>
     <input type="text" id="text1Input" value="Coser名稱" />
-    <label for="size1Input">Coser名稱字體大小</label>
+    <label for="size1Input">字體大小</label>
     <input type="number" id="size1Input" value="64" />
 
     <label for="text2Input">攤位編號</label>
     <input type="text" id="text2Input" value="A01" />
-    <label for="size2Input">攤位編號字體大小</label>
+    <label for="size2Input">字體大小</label>
     <input type="number" id="size2Input" value="56" />
 
     <button id="resetBtn">重設</button>
@@ -101,12 +101,12 @@
     const downloadBtn = document.getElementById('downloadBtn');
     const resetBtn = document.getElementById('resetBtn');
 
-    let text1 = { value: text1Input.value, x: 60, y: 1150, size: parseInt(size1Input.value) };
-    let text2 = { value: text2Input.value, x: 60, y: 1270, size: parseInt(size2Input.value) };
+    let text1 = { value: text1Input.value, x: 30, y: 500, size: parseInt(size1Input.value) };
+    let text2 = { value: text2Input.value, x: 30, y: 560, size: parseInt(size2Input.value) };
     let draggingText = null;
 
     let portrait = null;
-    let portraitX = 0, portraitY = 0;
+    let portraitX = 100, portraitY = 150;
     let portraitScale = 1;
 
     const background = new Image();
@@ -146,12 +146,13 @@
       });
 
       resetBtn.addEventListener('click', () => {
-        text1 = { value: 'Coser名稱', x: 60, y: 1150, size: 64 };
-        text2 = { value: 'A01', x: 60, y: 1270, size: 56 };
+        text1 = { value: 'Coser名稱', x: 30, y: 500, size: 64 };
+        text2 = { value: 'A01', x: 30, y: 560, size: 56 };
+        portraitX = 100;
+        portraitY = 150;
         drawAll();
       });
 
-      let isDragging = false;
       canvas.addEventListener('mousedown', e => {
         const mx = e.offsetX, my = e.offsetY;
         [text1, text2].forEach(t => {
@@ -160,13 +161,12 @@
           const h = t.size;
           if (mx >= t.x && mx <= t.x + w && my >= t.y - h && my <= t.y) {
             draggingText = t;
-            isDragging = true;
           }
         });
       });
 
       canvas.addEventListener('mousemove', e => {
-        if (isDragging && draggingText) {
+        if (draggingText) {
           draggingText.x = e.offsetX;
           draggingText.y = e.offsetY;
           drawAll();
@@ -175,7 +175,6 @@
 
       canvas.addEventListener('mouseup', () => {
         draggingText = null;
-        isDragging = false;
       });
 
       photoInput.addEventListener('change', e => {
