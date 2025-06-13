@@ -61,6 +61,7 @@
       border: 1px solid #000;
       margin: auto;
       display: block;
+      cursor: default;
     }
     @media (min-width: 768px) {
       body { flex-direction: row; }
@@ -76,12 +77,12 @@
 
     <label for="text1Input">Coser名稱</label>
     <input type="text" id="text1Input" value="Coser名稱" />
-    <label for="size1Input">字體大小</label>
+    <label for="size1Input">Coser名稱字體大小</label>
     <input type="number" id="size1Input" value="64" />
 
     <label for="text2Input">攤位編號</label>
     <input type="text" id="text2Input" value="A01" />
-    <label for="size2Input">字體大小</label>
+    <label for="size2Input">攤位編號字體大小</label>
     <input type="number" id="size2Input" value="56" />
 
     <button id="resetBtn">重設</button>
@@ -165,14 +166,29 @@
           if (mx >= x && mx <= x + w && my >= t.y - h && my <= t.y) {
             draggingText = t;
             isDragging = true;
+            canvas.style.cursor = 'move';
           }
         });
       });
 
       canvas.addEventListener('mousemove', e => {
+        const mx = e.offsetX, my = e.offsetY;
+        let overText = false;
+        [text1, text2].forEach(t => {
+          ctx.font = `${t.size}px 'Noto Sans TC'`;
+          const textWidth = ctx.measureText(t.value).width;
+          const x = t.center ? t.x - textWidth / 2 : t.x;
+          const w = textWidth;
+          const h = t.size;
+          if (mx >= x && mx <= x + w && my >= t.y - h && my <= t.y) {
+            overText = true;
+          }
+        });
+        canvas.style.cursor = overText || isDragging ? 'move' : 'default';
+
         if (isDragging && draggingText) {
-          draggingText.x = e.offsetX;
-          draggingText.y = e.offsetY;
+          draggingText.x = mx;
+          draggingText.y = my;
           draggingText.center = false;
           drawAll();
         }
@@ -181,11 +197,13 @@
       canvas.addEventListener('mouseup', () => {
         draggingText = null;
         isDragging = false;
+        canvas.style.cursor = 'default';
       });
 
       canvas.addEventListener('mouseleave', () => {
         draggingText = null;
         isDragging = false;
+        canvas.style.cursor = 'default';
       });
 
       photoInput.addEventListener('change', e => {
