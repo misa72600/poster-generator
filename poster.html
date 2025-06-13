@@ -11,7 +11,7 @@
     .controls label { display: block; margin-top: 10px; }
     .controls input[type="text"], .controls input[type="number"], .controls input[type="file"] { width: 100%; padding: 4px; margin-top: 4px; }
     .controls button { margin-top: 15px; width: 100%; padding: 10px; font-size: 16px; background: #555; color: #fff; border: none; cursor: pointer; }
-    canvas { flex: 1; width: 100%; max-width: 800px; background: #fff; border: 1px solid #000; margin: auto; display: block; }
+    canvas { flex: 1; width: 100%; max-width: 400px; background: #fff; border: 1px solid #000; margin: auto; display: block; }
     @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@900&display=swap');
 
     @media (min-width: 768px) {
@@ -39,7 +39,7 @@
     <button id="downloadBtn">下載圖片</button>
   </div>
 
-  <canvas id="c" width="800" height="1200"></canvas>
+  <canvas id="c" width="400" height="600"></canvas>
   <script>
     const canvas = document.getElementById('c');
     const ctx = canvas.getContext('2d');
@@ -51,8 +51,8 @@
     const size2Input = document.getElementById('size2Input');
     const downloadBtn = document.getElementById('downloadBtn');
 
-    let text1 = { value: text1Input.value, x: 60, y: 1000, size: parseInt(size1Input.value) };
-    let text2 = { value: text2Input.value, x: 60, y: 1080, size: parseInt(size2Input.value) };
+    let text1 = { value: text1Input.value, x: 30, y: 500, size: parseInt(size1Input.value) };
+    let text2 = { value: text2Input.value, x: 30, y: 560, size: parseInt(size2Input.value) };
     let draggingText = null;
 
     let portrait = null;
@@ -69,7 +69,7 @@
       }
 
       if (portrait && portrait.complete && portrait.naturalWidth > 0) {
-        ctx.drawImage(portrait, 200, 300, 400, 600);
+        ctx.drawImage(portrait, 100, 150, 200, 300);
       } else if (portrait) {
         console.warn('⚠️ 使用者上傳的圖片尚未完成載入');
       }
