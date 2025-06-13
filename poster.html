@@ -75,6 +75,9 @@
     <label for="size2Input">字體大小</label>
     <input type="number" id="size2Input" value="56" />
 
+    <label for="scaleInput">照片縮放（%）</label>
+    <input type="number" id="scaleInput" value="100" min="10" max="300" />
+
     <button id="downloadBtn">下載圖片</button>
   </div>
 
@@ -88,37 +91,30 @@
     const size1Input = document.getElementById('size1Input');
     const size2Input = document.getElementById('size2Input');
     const photoInput = document.getElementById('photoInput');
+    const scaleInput = document.getElementById('scaleInput');
     const downloadBtn = document.getElementById('downloadBtn');
 
     let text1 = { value: text1Input.value, x: 30, y: 500, size: parseInt(size1Input.value) };
     let text2 = { value: text2Input.value, x: 30, y: 560, size: parseInt(size2Input.value) };
     let draggingText = null;
+    let draggingImage = false;
 
     let portrait = null;
+    let portraitX = 100, portraitY = 150;
+    let portraitScale = 1;
+
     const background = new Image();
     background.crossOrigin = 'anonymous';
     background.src = 'https://misa72600.github.io/poster-generator/123.png';
 
     function drawAll() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.drawImage(background, 0, 0, canvas.width, canvas.height);
 
-      if (background.complete && background.naturalWidth > 0) {
-        ctx.drawImage(background, 0, 0, canvas.width, canvas.height);
-      } else {
-        ctx.fillStyle = '#222';
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-      }
-
-      if (portrait && portrait.complete && portrait.naturalWidth > 0) {
-        const scale = Math.max(
-          canvas.width / portrait.naturalWidth,
-          canvas.height / portrait.naturalHeight
-        );
-        const sw = portrait.naturalWidth * scale;
-        const sh = portrait.naturalHeight * scale;
-        const dx = (canvas.width - sw) / 2;
-        const dy = (canvas.height - sh) / 2;
-        ctx.drawImage(portrait, dx, dy, sw, sh);
+      if (portrait) {
+        const sw = portrait.naturalWidth * portraitScale;
+        const sh = portrait.naturalHeight * portraitScale;
+        ctx.drawImage(portrait, portraitX, portraitY, sw, sh);
       }
 
       [text1, text2].forEach(t => {
@@ -132,26 +128,34 @@
     }
 
     function enableControls() {
-      [text1Input, text2Input, size1Input, size2Input].forEach(el => {
+      [text1Input, text2Input, size1Input, size2Input, scaleInput].forEach(el => {
         el.addEventListener('input', () => {
           text1.value = text1Input.value;
           text2.value = text2Input.value;
           text1.size = parseInt(size1Input.value);
           text2.size = parseInt(size2Input.value);
+          portraitScale = parseFloat(scaleInput.value) / 100;
           drawAll();
         });
       });
 
       canvas.addEventListener('mousedown', e => {
         const mx = e.offsetX, my = e.offsetY;
-        [text1, text2].forEach(t => {
-          ctx.font = `${t.size}px 'Noto Sans TC'`;
-          const w = ctx.measureText(t.value).width;
-          const h = t.size;
-          if (mx >= t.x && mx <= t.x + w && my >= t.y - h && my <= t.y) {
-            draggingText = t;
-          }
-        });
+        const sw = portrait ? portrait.naturalWidth * portraitScale : 0;
+        const sh = portrait ? portrait.naturalHeight * portraitScale : 0;
+
+        if (portrait && mx >= portraitX && mx <= portraitX + sw && my >= portraitY && my <= portraitY + sh) {
+          draggingImage = true;
+        } else {
+          [text1, text2].forEach(t => {
+            ctx.font = `${t.size}px 'Noto Sans TC'`;
+            const w = ctx.measureText(t.value).width;
+            const h = t.size;
+            if (mx >= t.x && mx <= t.x + w && my >= t.y - h && my <= t.y) {
+              draggingText = t;
+            }
+          });
+        }
       });
 
       canvas.addEventListener('mousemove', e => {
@@ -160,9 +164,17 @@
           draggingText.y = e.offsetY;
           drawAll();
         }
+        if (draggingImage) {
+          portraitX = e.offsetX;
+          portraitY = e.offsetY;
+          drawAll();
+        }
       });
 
-      canvas.addEventListener('mouseup', () => draggingText = null);
+      canvas.addEventListener('mouseup', () => {
+        draggingText = null;
+        draggingImage = false;
+      });
 
       photoInput.addEventListener('change', e => {
         const file = e.target.files[0];
@@ -171,6 +183,8 @@
         reader.onload = ev => {
           portrait = new Image();
           portrait.onload = () => {
+            portraitX = (canvas.width - portrait.naturalWidth * portraitScale) / 2;
+            portraitY = (canvas.height - portrait.naturalHeight * portraitScale) / 2;
             drawAll();
           };
           portrait.src = ev.target.result;
@@ -187,7 +201,6 @@
     }
 
     background.onload = () => {
-      console.log('✅ 背景圖已載入');
       drawAll();
       enableControls();
     }
