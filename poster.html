@@ -51,12 +51,6 @@
     const size2Input = document.getElementById('size2Input');
     const downloadBtn = document.getElementById('downloadBtn');
 
-    const font = new FontFace('Noto Sans TC', 'url(https://fonts.gstatic.com/s/notosanstc/v30/-nF7OGc18vARl5uFOEjm5pT_YToHnKrsbB5yZq0.woff2)');
-    font.load().then(function(loadedFont) {
-      document.fonts.add(loadedFont);
-      init();
-    });
-
     let text1 = { value: text1Input.value, x: 60, y: 1000, size: parseInt(size1Input.value) };
     let text2 = { value: text2Input.value, x: 60, y: 1080, size: parseInt(size2Input.value) };
     let draggingText = null;
@@ -67,15 +61,15 @@
 
     let background = new Image();
     background.crossOrigin = 'anonymous';
-    background.src = 'https://static.wixstatic.com/media/3d17ac_0f61bc2106524f64aa1bd3bd7b3d7e76~mv2.png';
+    background.src = 'https://i.ibb.co/4nCCrQs/bg.png';
 
     function draw() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
-      ctx.drawImage(background, 0, 0, canvas.width, canvas.height);
-      if (portrait) ctx.drawImage(portrait, 200, 300, 400, 600);
+      if (background.complete) ctx.drawImage(background, 0, 0, canvas.width, canvas.height);
+      if (portrait && portrait.complete) ctx.drawImage(portrait, 200, 300, 400, 600);
 
       [text1, text2].forEach(text => {
-        ctx.font = `${text.size}px Noto Sans TC`;
+        ctx.font = `${text.size}px 'Noto Sans TC', sans-serif`;
         ctx.lineWidth = 8;
         ctx.strokeStyle = '#000';
         ctx.fillStyle = '#fff';
@@ -100,7 +94,7 @@
           canvas.addEventListener('mousedown', e => {
             const mx = e.offsetX, my = e.offsetY;
             [text1, text2].forEach(text => {
-              ctx.font = `${text.size}px Noto Sans TC`;
+              ctx.font = `${text.size}px 'Noto Sans TC', sans-serif`;
               const width = ctx.measureText(text.value).width;
               const height = text.size;
               if (mx >= text.x && mx <= text.x + width && my <= text.y && my >= text.y - height) {
@@ -146,6 +140,8 @@
         }
       }
     }
+
+    window.onload = init;
   </script>
 </body>
 </html>
