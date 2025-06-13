@@ -61,8 +61,18 @@
 
     function draw() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
-      if (background.complete && background.naturalWidth > 0) ctx.drawImage(background, 0, 0, canvas.width, canvas.height);
-      if (portrait && portrait.complete && portrait.naturalWidth > 0) ctx.drawImage(portrait, 200, 300, 400, 600);
+
+      if (background.complete && background.naturalWidth > 0) {
+        ctx.drawImage(background, 0, 0, canvas.width, canvas.height);
+      } else {
+        console.warn('⚠️ 背景圖尚未載入或有問題');
+      }
+
+      if (portrait && portrait.complete && portrait.naturalWidth > 0) {
+        ctx.drawImage(portrait, 200, 300, 400, 600);
+      } else if (portrait) {
+        console.warn('⚠️ 使用者上傳的圖片尚未完成載入');
+      }
 
       [text1, text2].forEach(text => {
         ctx.font = `${text.size}px 'Noto Sans TC', sans-serif`;
@@ -79,6 +89,7 @@
       text2.value = text2Input.value;
       text1.size = parseInt(size1Input.value);
       text2.size = parseInt(size2Input.value);
+      console.log('🔤 更新文字內容與大小', text1, text2);
       draw();
     }
 
@@ -131,15 +142,13 @@
       });
     }
 
-    background.onload = () => {
-      console.log('✅ 背景圖已載入');
+    background.decode().then(() => {
+      console.log('✅ 背景圖 decode 成功');
       draw();
       enableInteractions();
-    };
-
-    background.onerror = () => {
+    }).catch(() => {
       alert("背景圖片載入失敗，請確認圖片網址是否正確。");
-    };
+    });
   </script>
 </body>
 </html>
