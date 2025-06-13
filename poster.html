@@ -110,7 +110,15 @@
       }
 
       if (portrait && portrait.complete && portrait.naturalWidth > 0) {
-        ctx.drawImage(portrait, 100, 150, 200, 300);
+        const scale = Math.max(
+          canvas.width / portrait.naturalWidth,
+          canvas.height / portrait.naturalHeight
+        );
+        const sw = portrait.naturalWidth * scale;
+        const sh = portrait.naturalHeight * scale;
+        const dx = (canvas.width - sw) / 2;
+        const dy = (canvas.height - sh) / 2;
+        ctx.drawImage(portrait, dx, dy, sw, sh);
       }
 
       [text1, text2].forEach(t => {
