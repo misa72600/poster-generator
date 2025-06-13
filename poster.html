@@ -104,7 +104,6 @@
     let text1 = { value: text1Input.value, x: 30, y: 500, size: parseInt(size1Input.value) };
     let text2 = { value: text2Input.value, x: 30, y: 560, size: parseInt(size2Input.value) };
     let draggingText = null;
-    let draggingImage = false;
 
     let portrait = null;
     let portraitX = 100, portraitY = 150;
@@ -156,21 +155,14 @@
 
       canvas.addEventListener('mousedown', e => {
         const mx = e.offsetX, my = e.offsetY;
-        const sw = portrait ? portrait.naturalWidth * portraitScale : 0;
-        const sh = portrait ? portrait.naturalHeight * portraitScale : 0;
-
-        if (portrait && mx >= portraitX && mx <= portraitX + sw && my >= portraitY && my <= portraitY + sh) {
-          draggingImage = true;
-        } else {
-          [text1, text2].forEach(t => {
-            ctx.font = `${t.size}px 'Noto Sans TC'`;
-            const w = ctx.measureText(t.value).width;
-            const h = t.size;
-            if (mx >= t.x && mx <= t.x + w && my >= t.y - h && my <= t.y) {
-              draggingText = t;
-            }
-          });
-        }
+        [text1, text2].forEach(t => {
+          ctx.font = `${t.size}px 'Noto Sans TC'`;
+          const w = ctx.measureText(t.value).width;
+          const h = t.size;
+          if (mx >= t.x && mx <= t.x + w && my >= t.y - h && my <= t.y) {
+            draggingText = t;
+          }
+        });
       });
 
       canvas.addEventListener('mousemove', e => {
@@ -179,16 +171,10 @@
           draggingText.y = e.offsetY;
           drawAll();
         }
-        if (draggingImage) {
-          portraitX = e.offsetX;
-          portraitY = e.offsetY;
-          drawAll();
-        }
       });
 
       canvas.addEventListener('mouseup', () => {
         draggingText = null;
-        draggingImage = false;
       });
 
       photoInput.addEventListener('change', e => {
