@@ -104,6 +104,7 @@
     let text1 = { value: text1Input.value, x: canvas.width / 2, y: 60, size: parseInt(size1Input.value), center: true };
     let text2 = { value: text2Input.value, x: 80, y: 120, size: parseInt(size2Input.value), center: false };
     let draggingText = null;
+    let isDragging = false;
 
     let portrait = null;
     let portraitX = 0, portraitY = 0;
@@ -153,7 +154,6 @@
         drawAll();
       });
 
-      let isDragging = false;
       canvas.addEventListener('mousedown', e => {
         const mx = e.offsetX, my = e.offsetY;
         [text1, text2].forEach(t => {
@@ -179,6 +179,11 @@
       });
 
       canvas.addEventListener('mouseup', () => {
+        draggingText = null;
+        isDragging = false;
+      });
+
+      canvas.addEventListener('mouseleave', () => {
         draggingText = null;
         isDragging = false;
       });
