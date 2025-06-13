@@ -51,12 +51,12 @@
       font-family: 'Noto Sans TC', sans-serif;
     }
     #downloadBtn:hover {
-      background: #27ae60;
+      background: #145a32;
     }
     canvas {
       flex: 1;
       width: 100%;
-      max-width: 400px;
+      max-width: 540px;
       background: #444;
       border: 1px solid #000;
       margin: auto;
@@ -88,7 +88,7 @@
     <button id="downloadBtn">下載圖片</button>
   </div>
 
-  <canvas id="c" width="400" height="600"></canvas>
+  <canvas id="c" width="1080" height="1350"></canvas>
   <script>
     const canvas = document.getElementById('c');
     const ctx = canvas.getContext('2d');
@@ -101,12 +101,12 @@
     const downloadBtn = document.getElementById('downloadBtn');
     const resetBtn = document.getElementById('resetBtn');
 
-    let text1 = { value: text1Input.value, x: 30, y: 500, size: parseInt(size1Input.value) };
-    let text2 = { value: text2Input.value, x: 30, y: 560, size: parseInt(size2Input.value) };
+    let text1 = { value: text1Input.value, x: 60, y: 1150, size: parseInt(size1Input.value) };
+    let text2 = { value: text2Input.value, x: 60, y: 1270, size: parseInt(size2Input.value) };
     let draggingText = null;
 
     let portrait = null;
-    let portraitX = 100, portraitY = 150;
+    let portraitX = 0, portraitY = 0;
     let portraitScale = 1;
 
     const background = new Image();
@@ -146,10 +146,8 @@
       });
 
       resetBtn.addEventListener('click', () => {
-        text1 = { value: 'Coser名稱', x: 30, y: 500, size: 64 };
-        text2 = { value: 'A01', x: 30, y: 560, size: 56 };
-        portraitX = 100;
-        portraitY = 150;
+        text1 = { value: 'Coser名稱', x: 60, y: 1150, size: 64 };
+        text2 = { value: 'A01', x: 60, y: 1270, size: 56 };
         drawAll();
       });
 
@@ -166,7 +164,7 @@
       });
 
       canvas.addEventListener('mousemove', e => {
-        if (draggingText) {
+        if (draggingText && e.buttons === 1) {
           draggingText.x = e.offsetX;
           draggingText.y = e.offsetY;
           drawAll();
